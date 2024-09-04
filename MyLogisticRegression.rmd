@@ -1,0 +1,132 @@
+---
+title: "My Simple Logistic Regression"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+<!-- Find some data of interest to you that can be analyzed with a logistic regression. Complete your Logistic Regression Analysis using this file. 
+
+Hint, run the command 
+
+> data() 
+
+in your Console to see available datasets in R that you could use for this Analysis. You are also welcome to collect data yourself, or find other available datasets online for this Analysis. Just be careful to not use anyone else's "analysis" for this Analysis. Also, no conducting surveys unless you have IRB approval to do so. -->
+
+```{r, include=FALSE}
+library(mosaic)
+library(ResourceSelection) 
+library(DT)
+library(pander)
+library(car)
+library(tidyverse)
+library(lattice)
+library(dplyr)
+
+data <- read_csv("../../Data/car_data.csv")
+
+datatable(data)
+
+#View(data)
+```
+
+## Backround
+
+Using the car_data set from an online website, Kaggle, we find data consisting of car users' gender, age, annual salary, and whether they purchased a car or not, distinguished by 0's and 1's. This analysis will examine how demographic factors—age and annual salary—affect purchasing decisions. By applying logistic regression, we can quantify the likelihood of an individual making a purchase based on their demographic profile.
+
+The dataset comprises 1000 records with variables including gender, age, annual salary, and whether they made a purchase. The objective is to identify significant predictors that businesses can leverage to enhance their marketing effectiveness.
+
+## Model
+
+$$
+  P(Y_i = 1|\, x_i) = \frac{e^{\beta_0 + \beta_1 x_i}}{1+e^{\beta_0 + \beta_1 x_i}} = \pi_i
+$$
+Hypotheses
+
+\textbf{Null Hypothesis} (\( H_0 \)):
+\[
+H_{0}: \beta_{\text{1}} = 0
+\]
+Null Hypothesis (H0):
+There is no significant association between age/annual salary and purchasing behavior.
+
+\textbf{Alternative Hypothesis} (\( H_A \)):
+\[
+H_{A}: \beta_{\text{1}} \neq 0 \
+\]
+Alternative Hypothesis (H1):
+Age/annual salary significantly influences purchasing behavior.
+
+## Logistic Regression
+
+```{r, message=FALSE, warning=FALSE}
+logit_model <- glm(Purchased ~ Age + AnnualSalary, data=data, family=binomial)
+
+# Plot logistic regression
+ggplot(data, aes(x=Age, y=Purchased)) +
+  geom_point(aes(color=factor(Purchased))) +
+  geom_smooth(method="glm", method.args=list(family="binomial")) +
+  labs(title="Logistic Regression Plot of Purchasing Behavior by Age", 
+       color="Purchased") +
+  theme_minimal()
+
+# QQ Plot of residuals
+qqnorm(residuals(logit_model), main="QQ Plot of Residuals")
+qqline(residuals(logit_model))
+
+# Summary of the model
+summary(logit_model)
+
+```
+
+## Numerical Summary 
+
+```{r, message=FALSE, warning=FALSE}
+summary(data)
+```
+
+## Coefficients
+
+```{r, message=FALSE, warning=FALSE}
+coef_table <- coef(summary(logit_model))
+pander(coef_table)
+```
+
+## Goodness of Fit
+
+```{r, message=FALSE, warning=FALSE}
+deviance <- logit_model$deviance
+df_resid <- logit_model$df.residual
+p_value <- pchisq(deviance, df_resid, lower.tail = FALSE)
+
+pander(p_value)
+
+# Plotting goodness of fit
+plot(logit_model, which=2)
+```
+
+## Prediction
+
+```{r, message=FALSE, warning=FALSE}
+new_data <- data.frame(Age = c(30, 40), AnnualSalary = c(60000, 80000))
+predictions <- predict(logit_model, newdata = new_data, type = "response")
+
+pander(predictions)
+```
+
+## Results and Interpretation 
+
+The logistic regression analysis indicates that age and annual salary significantly influence purchasing behavior.
+
+The model's goodness of fit suggests that the selected predictors explain a substantial portion of the variation in purchasing behavior within the dataset.
+
+- **Age**: Age (\( \beta_{\text{Age}} \)) has a coefficient of 0.2195, with a very low p-value (<< 0.001), indicating a strong significant relationship. This means that for every one-unit increase in age, the odds of making a purchase increase by a factor of \( e^{0.2195} \)) ≈ 1.245
+
+- **Annual Salary**: Annual salary (\( \beta_{\text{AnnualSalary}} \)) also shows a significant effect, with a coefficient of 3.37e-05 and a very low p-value (<< 0.001). This suggests that higher annual salaries are associated with increased odds of making a purchase.For every one-unit increase in annual salary, the odds of making a purchase increase by a factor of \( e^{3.37e−05} \)) ≈ 1.00003
+
+## Conclusion 
+
+In conclusion, the logistic regression analysis reveals several key insights into the factors influencing purchasing behavior. Age and annual salary demonstrate statistically significant relationships with the likelihood of making a purchase.
+
+The model's goodness of fit indicates that the chosen predictors explain a substantial portion of the variation in purchasing behavior within the dataset. This finding suggests that businesses can use demographic segmentation based on age and income to better target their marketing campaigns and product offerings.

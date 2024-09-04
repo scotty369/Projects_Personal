@@ -1,0 +1,139 @@
+---
+title: "Consulting"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+```{r, message=FALSE, warning=FALSE} 
+# Libraries
+library(mosaic)
+library(DT)
+library(pander)
+library(car)
+library(tidyverse)
+library(lattice)
+
+# Data set
+data <- read_csv("../Data/USBirths.csv")
+
+# datatable(data)
+
+# View(data)
+```
+
+# Backround
+
+The number of births in the United States varies throughout the year due to various factors, such as seasonal changes, holidays, and cultural events. Understanding these patterns can provide valuable insights for healthcare planning, resource allocation, and policy-making. By analyzing the relationship between the time of year and the number of births, we can identify trends and make more informed decisions.
+
+### Question
+
+How does the day of the year influence the number of births in the United States?
+
+## Hypotheses
+
+\textbf{Hypotheses}
+
+\textbf{Null Hypothesis} (\( H_0 \)):
+\[
+H_{0}: \beta_{\text{1}} = 0
+\]
+
+Null Hypothesis (H0):
+The day of the year has no significant effect on the number of births in the United States.
+
+\textbf{Alternative Hypothesis} (\( H_A \)):
+\[
+H_{A}: \beta_{\text{1}} \neq 0 \
+\]
+Alternative Hypothesis (H1):
+The day of the year has a significant effect on the number of births in the United States.
+
+\textbf{Significance level}
+We will use a significance level of 0.05
+
+### Regression Equation
+
+Regression Equation
+The simple linear regression equation is:
+𝑌=𝛽0+𝛽1𝑋
+
+where:
+𝑌Births is the predicted number of births,
+𝛽0 is the y-intercept
+𝛽1 is the slope of the regression line,
+X is the independent variable representing the day of the year.
+
+## Analysis
+
+```{r, message=FALSE, warning=FALSE}
+# Plot
+# Plotting day of the year vs. births
+plot <- ggplot(data, aes(x = day_of_year, y = births)) +
+  geom_point(color = "blue", alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE, color = "red", linetype = "dashed") +
+  labs(title = "Scatter Plot of Day of the Year vs. Number of Births",
+       x = "Day of the Year",
+       y = "Number of Births") +
+  theme_minimal()
+
+# Print the plot explicitly
+print(plot)
+
+# Fit linear regression model
+model <- lm(births ~ day_of_year, data = data)
+
+# Summary of the model
+model_summary <- summary(model)
+
+# Extract coefficients, R-squared, and p-value
+coefficients <- coef(summary(model))
+intercept <- coefficients[1, 1]
+slope <- coefficients[2, 1]
+r_squared <- model_summary$r.squared
+p_value <- coefficients[2, 4]
+
+# Display model summary in a table
+model_summary_table <- data.frame(Intercept = intercept,
+                                  Slope = slope,
+                                  R_Squared = r_squared,
+                                  P_Value = p_value)
+
+pander::pander(model_summary_table)
+
+```
+
+## Numerical Summary
+
+```{r, message=FALSE, warning=FALSE}
+summary(data)
+
+fivenum(data$day_of_year)
+
+fivenum(data$births)
+```
+
+## Diagnostic Plots
+
+```{r, message=FALSE, warning=FALSE}
+par(mfrow = c(2, 2))
+plot(model)
+```
+
+## Results and Interpretation 
+
+The summary of the regression model provides several important pieces of information:
+
+Intercept 𝛽0: 228392
+Slope 𝛽1: 31.59
+R-squared: 0.04698
+P-value for slope:2.887e-05 
+
+R-squared: The R-squared value of 0.04698 indicates that approximately 4.70% of the variability in the number of births is explained by the day of the year. This suggests a relatively weak linear relationship, implying that factors beyond the day of the year significantly influence birth rates in the United States.
+
+p-value: The p-value for the slope is 2.887e-05, which is much less than the significance level of 0.05. This indicates that the relationship between the day of the year and the number of births is statistically significant, suggesting that there is a measurable effect of the day of the year on birth rates.
+
+# Conclusion
+
+These results indicate that there is a statistically significant relationship between the day of the year and the number of births in the United States. However, the R-squared value indicates that the day of the year explains only a small proportion of the variability in birth rates, highlighting the influence of other factors such as economic conditions, cultural practices, and healthcare policies on birth trends.

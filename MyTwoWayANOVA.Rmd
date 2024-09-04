@@ -1,0 +1,96 @@
+---
+title: "My Two-way ANOVA"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+```{r, warning=FALSE, message=FALSE}
+library(mosaic)
+library(DT)
+library(pander)
+library(car)
+library(tidyverse)
+library(lattice)
+library(ggplot2)
+
+# Read in the data
+data <- read_csv("../../Data/Analysis-W5.csv")
+```
+
+<!-- Instructions:
+
+Perform your own mini experiment using two factors that each have at least two levels. Analyze your data using a two-way ANOVA.
+
+Studying reaction time is recommended because the data is quickly collected.
+
+While you should use the warpbreaks example analyses as your guide on how to properly complete this analysis, you should also be creative in your final delivery of this analysis. If you copy the format and approach of the example analyses, be sure to give credit in your document to these example analyses. You could write something like, "This work is modeled after the [warpbreaks](https://byuistats.github.io/Statistics-Notebook/Analyses/ANOVA/Examples/warpbreaksTwoWayANOVA.html) analysis." Whatever you do, DO NOT use any of the written statements from the example analyses in your analysis unless you quote them directly and give credit. Using someone else's writing as your own without giving credit to the original author is plagiarism and is an Honor Code Violation. So do your own work. Plus, the more you try to write things in your own words, the more you will learn. Also, note that there aren't really any "rules" about exactly how your document should be organized. So be creative and organize your file in a way that makes sense to you, but still has all important elements.
+
+-->
+Introduction:
+In this study, we aim to understand the effect of two factors, Device_type and Time_of_day, on reaction times. The data was collected from a mini-experiment where participants' reaction times were measured using different devices at different times of the day. The goal is to determine if there are significant differences in reaction times based on the type of device used and the time of day, and if there is any interaction between these two factors.
+
+Hypotheses: 
+\begin{aligned}
+&\text{H}_{0_1}: \text{There is no significant difference in mean reaction time among different levels of Device_type.} \\
+&\text{H}_{1_1}: \text{There is a significant difference in mean reaction time among different levels of Device_type.} \\
+&\text{H}_{0_2}: \text{There is no significant difference in mean reaction time among different levels of Time_of_day.} \\
+&\text{H}_{1_2}: \text{There is a significant difference in mean reaction time among different levels of Time_of_day.} \\
+&\text{H}_{0_3}: \text{There is no significant interaction effect between Device_type and Time_of_day on reaction time.} \\
+&\text{H}_{1_3}: \text{There is a significant interaction effect between Device_type and Time_of_day on reaction time.} \\
+\end{aligned}
+
+Level of Significance:
+We will use a significance level α of 0.05 for all hypothesis tests.
+
+```{r, warning=FALSE, message=FALSE}
+# Code for my Two Way Anova:
+
+datatable(head(data))
+
+ggplot(data, aes(x = Device_type, y = Time, fill = Time_of_day)) +
+  geom_boxplot() +
+  labs(x = "Device Type", y = "Time (ms)", title = "Reaction Time by Device Type and Time of Day") +
+  theme_minimal()
+
+ggplot(data, aes(x = Time_of_day, y = Time, fill = Device_type)) +
+  geom_boxplot() +
+  labs(x = "Time of Day", y = "Time (ms)", title = "Reaction Time by Time of Day and Device Type") +
+  theme_minimal()
+```
+
+Explanation of the Box Plot
+The box plot visually displays the distribution of response times (Time) for the device type (Computer vs. Phone) across the two different times of day (Morning vs. Evening). On the left side, we have the level 1 being the computer and the data that was taken in the morning and the evening. On the right side, we have data taken from my phone that was also taken in the morning and the evening. We notice that the phone had much higher values. In this case, a higher value is not good; it means the response time was longer. In general, it appears that the computer performed better with the reaction test as the values are much lower. However, while there might be a visual difference, we have to check the statistical results to verify if there was any significance in the data or not.
+
+```{r}
+anova_model <- aov(Time ~ Device_type * Time_of_day, data = data)
+
+anova_result <- summary(anova_model)
+pander(anova_result)
+
+qqnorm(residuals(anova_model))
+qqline(residuals(anova_model))
+
+shapiro_test <- shapiro.test(residuals(anova_model))
+pander(shapiro_test)
+
+bartlett_test <- bartlett.test(Time ~ interaction(Device_type, Time_of_day), data = data)
+pander(bartlett_test)
+
+anova_result
+```
+
+
+Explanation of the Box plot: The box plot visually displays the distribution of response times (Time) for the device type (Computer vs. Phone) across the two different times of day (Morning vs. Evening). On the left side we have the level 1 being the computer and the data that was taken in the morning and the evening, and on the right side we have data taken from my phone that was also taken in the morning and the evening. We notice that the phone had much highr values. In this case, a higher value is not good, it means the response time was longer. In general, it appears that the computer performed better with the reaction test as the values are much lower. However, while there might be a visual difference, we have to check the statistical results to verify if there was any significance in the data or not. 
+
+Summary of Results:
+Device_type: The p-value (0.0668) for Device_type suggests that there may be a significant difference in mean response time between Computer and Phone, but it is not statistically significant at the typical alpha level of 0.05.
+Time_of_day: The p-value (0.5445) for Time_of_day indicates that there is no significant difference in mean response time between Morning and Evening.
+Interaction: The p-value (0.3339) for the interaction between Device_type and Time_of_day suggests that there is no significant interaction effect between Device_type and Time_of_day on response time.
+
+Conclusion: 
+I can conclude that there is no statistically significant main effect of Device_type or Time_of_day, nor is there a significant interaction effect between Device_type and Time_of_day, on the response time as all of the above p-values are above the alpha level of 0.05 and prove to not be statistically significant. Therefore, we fail to reject the null hypotheses for all factors and their interaction.
+
+
+

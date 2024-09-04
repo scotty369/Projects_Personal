@@ -1,0 +1,160 @@
+---
+title: "Simple Linear Regression"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+```{r, message=FALSE, warning=FALSE}
+# Load your libraries
+library(mosaic)
+library(DT)
+library(pander)
+library(car)
+library(tidyverse)
+library(lattice)
+
+# Load your data after saving a csv file in your Data folder.
+
+# Read in the data
+
+data <- read_csv("../../Data/Linear_Regression.csv")
+
+datatable(data)
+
+# Don't forget to run "Session -> Set Working Directory -> To Source file location"
+
+```
+
+
+<!-- Directions
+
+Come up with a simple linear regression of your own creation. 
+
+* Write the Background and clearly state your question. Then collect data and perform the linear regression analysis in order to answer your question. Use the proper order of first, ask the question, then second, figure out the answer.
+
+* You should collect both the quantitative response variable and the quantitative explanatory variable yourself. This can be data you collect from 
+    - the internet (like weather data, Facebook data, or sports data) 
+    - your own experiment 
+    - your own observational study
+* However,     
+    - The data should not be a single pre-existing dataset. It must be something that you piece together yourself.
+
+* You need at least $n=3$ $(X,Y)$ pairs to perform the regression. However, your regression will only be useful if you can get around $n=10$ or more observations.
+
+-->
+
+
+# Background
+
+Social media usage has become prevalent in modern society, influencing various aspects of daily life. While it facilitates connectivity and access to information, there are concerns about its potential impact on mental health, particularly stress levels. Investigating the relationship between social media usage and stress can provide insights into how time spent on these platforms affects well-being.
+
+### Question
+
+Is there a linear relationship between the number of hours spent on social media per day and the reported stress levels among individuals?
+
+### Data Collection
+
+Data was collected from a sample of individuals who reported the number of hours they spend on social media per day and their corresponding stress levels on a scale from 1 to 10, with 1 being the lowest stress level and 10 being the highest. The data is presented below:
+
+## Hypotheses
+
+\textbf{Hypotheses}
+
+\textbf{Null Hypothesis} (\( H_0 \)):
+\[
+H_{0}: \beta_{\text{1}} = 0
+\]
+
+Null Hypothesis (H0):
+There is no linear relationship between the number of hours spent on social media per day and the reported stress levels (i.e., the slope of the regression line is zero).
+
+\textbf{Alternative Hypothesis} (\( H_A \)):
+\[
+H_{A}: \beta_{\text{1}} \neq 0 \
+\]
+Alternative Hypothesis (H1):
+There is a linear relationship between the number of hours spent on social media per day and the reported stress levels (i.e., the slope of the regression line is not zero)
+
+\textbf{Significance level}
+We will use a significance level of 0.05
+
+## Regression Equation
+Regression Equation
+The simple linear regression equation is:
+𝑌=𝛽0+𝛽1𝑋
+
+where:
+𝑌is the predicted stress level,
+𝛽0 is the y-intercept
+𝛽1 is the slope of the regression line,
+X is the number of hours spent on social media.
+
+## Numerical Summary
+
+```{r}
+summary(data)
+
+fivenum(data$Hours_Spent_on_Social_Media)
+
+fivenum(data$Stress_Level)
+
+```
+
+
+## Analysis
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(data, aes(x = Hours_Spent_on_Social_Media, y = Stress_Level)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "lightgreen") +
+  labs(title = "Scatter Plot of Social Media Usage vs. Stress Levels",
+       x = "Hours Spent on Social Media",
+       y = "Stress Level") +
+  theme_minimal()
+
+# Fit linear regression model
+model <- lm(Stress_Level ~ Hours_Spent_on_Social_Media, data = data)
+
+# Summary of the model
+model_summary <- summary(model)
+model_summary
+
+# Extract coefficients, R-squared, and p-value
+coefficients <- coef(summary(model))
+intercept <- coefficients[1, 1]
+slope <- coefficients[2, 1]
+r_squared <- model_summary$r.squared
+p_value <- coefficients[2, 4]
+
+# Display model summary in a table
+pander::pander(data.frame(Intercept = intercept, Slope = slope, R_Squared = r_squared, P_Value = p_value))
+
+```
+
+### Diagnostic Plots for Model Validation
+```{r}
+par(mfrow = c(2, 2))
+plot(model)
+```
+
+
+## Results and Interpretation
+
+The summary of the regression model provides several important pieces of information:
+
+Intercept 𝛽0: 1.867
+Slope 𝛽1: 0.978
+R-squared: 0.9759
+P-value for slope:6.425e-07
+
+R-squared: An R-squared value of 0.9759 indicates that approximately 97.59% of the variability in stress levels is explained by the number of hours spent on social media. This is a high value, suggesting a strong linear relationship
+.
+p-value: The p-value for the slope is 6.425e-07, which is much less than the significance level of 0.05. This indicates that the relationship between social media usage and stress levels is statistically significant.
+
+
+# Conclusion
+
+The linear regression analysis suggests a significant positive relationship between the number of hours spent on social media and the reported stress levels among individuals. This implies that as individuals spend more time on social media, their stress levels tend to increase. These findings highlight the importance of monitoring and potentially moderating social media usage to manage stress levels effectively.
+
