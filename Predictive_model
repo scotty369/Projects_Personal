@@ -1,0 +1,131 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+from sklearn.preprocessing import StandardScaler
+
+# Function to load and prepare data
+def load_data(file_path, target_column):
+    """
+    Load data from a CSV file and prepare features and target variable.
+    
+    Parameters:
+    - file_path: Path to the CSV file
+    - target_column: Name of the target column
+    
+    Returns:
+    - X: Feature matrix
+    - y: Target vector
+    - data: DataFrame with loaded data
+    """
+    data = pd.read_csv(file_path)
+    X = data.drop(target_column, axis=1)
+    y = data[target_column]
+    return X, y, data
+
+# Function to perform linear regression
+def perform_linear_regression(X, y):
+    """
+    Train a Linear Regression model and evaluate its performance.
+    
+    Parameters:
+    - X: Feature matrix
+    - y: Target vector
+    
+    Returns:
+    - model: Trained Linear Regression model
+    - X_test: Test features
+    - y_test: Test target
+    - y_pred: Predicted target values
+    """
+    # Normalize the features
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    # Split the dataset into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+
+    # Create and train the model
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+
+    # Make predictions
+    y_pred = model.predict(X_test)
+
+    return model, X_test, y_test, y_pred
+
+# Function to evaluate and plot results
+def evaluate_and_plot_results(y_test, y_pred):
+    """
+    Evaluate the model and plot results including actual vs predicted prices and residuals.
+    
+    Parameters:
+    - y_test: Actual target values from the test set
+    - y_pred: Predicted target values from the model
+    """
+    # Evaluate the model
+    mse = mean_squared_error(y_test, y_pred)
+    mae = mean_absolute_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
+
+    print(f'Mean Squared Error: {mse:.4f}')
+    print(f'Mean Absolute Error: {mae:.4f}')
+    print(f'R^2 Score: {r2:.4f}')
+
+    # Plot the actual vs predicted values
+    plt.figure(figsize=(14, 6))
+
+    # Scatter plot of Actual vs Predicted
+    plt.subplot(1, 2, 1)
+    plt.scatter(y_test, y_pred, color='blue', label='Predicted vs Actual')
+    plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red', linewidth=2, label='Perfect Fit')
+    plt.xlabel('Actual Values')
+    plt.ylabel('Predicted Values')
+    plt.title('Actual vs Predicted Values')
+    plt.legend()
+
+    # Residual plot
+    plt.subplot(1, 2, 2)
+    residuals = y_test - y_pred
+    plt.scatter(y_pred, residuals, color='blue')
+    plt.hlines(y=0, xmin=min(y_pred), xmax=max(y_pred), color='red', linewidth=2)
+    plt.xlabel('Predicted Values')
+    plt.ylabel('Residuals')
+    plt.title('Residual Plot')
+
+    plt.tight_layout()
+    plt.show()
+
+    # Plot histograms of errors
+    plt.figure(figsize=(12, 5))
+
+    plt.subplot(1, 2, 1)
+    plt.hist(y_test - y_pred, bins=20, color='blue', edgecolor='black')
+    plt.xlabel('Prediction Error')
+    plt.ylabel('Frequency')
+    plt.title('Histogram of Prediction Errors')
+
+    plt.subplot(1, 2, 2)
+    plt.hist(y_pred, bins=20, color='green', edgecolor='black')
+    plt.xlabel('Predicted Values')
+    plt.ylabel('Frequency')
+    plt.title('Histogram of Predicted Values')
+
+    plt.tight_layout()
+    plt.show()
+
+if __name__ == "__main__":
+    # Define file path and target column
+    file_path = 'your_dataset.csv'  # Replace with your dataset path
+    target_column = 'TARGET'  # Replace with your target column name
+
+    # Load and prepare the data
+    X, y, data = load_data(file_path, target_column)
+
+    # Perform linear regression
+    model, X_test, y_test, y_pred = perform_linear_regression(X, y)
+
+    # Evaluate and plot the results
+    evaluate_and_plot_results(y_test, y_pred)

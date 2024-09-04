@@ -1,0 +1,94 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.preprocessing import StandardScaler
+import seaborn as sns
+
+# Function to load and prepare data
+def load_data(file_path, target_column):
+    """
+    Load data from a CSV file and prepare features and target variable.
+    
+    Parameters:
+    - file_path: Path to the CSV file
+    - target_column: Name of the target column
+    
+    Returns:
+    - X: Feature matrix
+    - y: Target vector
+    - data: DataFrame with loaded data
+    """
+    data = pd.read_csv(file_path)
+    X = data.drop(target_column, axis=1)
+    y = data[target_column]
+    return X, y, data
+
+# Function to perform logistic regression
+def perform_logistic_regression(X, y):
+    """
+    Train a Logistic Regression model and evaluate its performance.
+    
+    Parameters:
+    - X: Feature matrix
+    - y: Target vector
+    
+    Returns:
+    - model: Trained Logistic Regression model
+    - X_test: Test features
+    - y_test: Test target
+    - y_pred: Predicted target values
+    """
+    # Normalize the features
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    # Split the dataset into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+
+    # Create and train the model
+    model = LogisticRegression(max_iter=1000)
+    model.fit(X_train, y_train)
+
+    # Make predictions
+    y_pred = model.predict(X_test)
+
+    return model, X_test, y_test, y_pred
+
+# Function to evaluate and plot results
+def evaluate_and_plot_results(y_test, y_pred):
+    """
+    Evaluate the model and plot confusion matrix.
+    
+    Parameters:
+    - y_test: Actual target values from the test set
+    - y_pred: Predicted target values from the model
+    """
+    # Evaluate the model
+    print("Classification Report:\n", classification_report(y_test, y_pred))
+    print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+
+    # Plot the confusion matrix
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Class 0', 'Class 1'], yticklabels=['Class 0', 'Class 1'])
+    plt.xlabel('Predicted')
+    plt.ylabel('Actual')
+    plt.title('Confusion Matrix')
+    plt.show()
+
+if __name__ == "__main__":
+    # Define file path and target column
+    file_path = 'your_dataset.csv'  # Replace with your dataset path
+    target_column = 'TARGET'  # Replace with your target column name
+
+    # Load and prepare the data
+    X, y, data = load_data(file_path, target_column)
+
+    # Perform logistic regression
+    model, X_test, y_test, y_pred = perform_logistic_regression(X, y)
+
+    # Evaluate and plot the results
+    evaluate_and_plot_results(y_test, y_pred)

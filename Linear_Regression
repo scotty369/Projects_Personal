@@ -1,0 +1,51 @@
+# Import necessary libraries for statistical analysis
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Load data from CSV file
+data = pd.read_csv('Linear_Regression.csv')
+
+# Display the first few rows of the dataset
+print("Data Head:")
+print(data.head())
+
+# Handle missing values by filling them with the mean of the column
+data['Hours_Spent_on_Social_Media'].fillna(data['Hours_Spent_on_Social_Media'].mean(), inplace=True)
+data['Stress_Level'].fillna(data['Stress_Level'].mean(), inplace=True)
+
+# Define the feature(s) and target variable
+X = data[['Hours_Spent_on_Social_Media']]  # Corrected feature column name
+y = data['Stress_Level']  # Corrected target variable column name
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Initialize and train the linear regression model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Make predictions using the test set
+y_pred = model.predict(X_test)
+
+# Calculate evaluation metrics
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+# Print evaluation metrics
+print(f'Mean Squared Error: {mse}')
+print(f'R^2 Score: {r2}')
+
+# Visualize the actual vs predicted results
+plt.figure(figsize=(10, 6))
+plt.scatter(X_test, y_test, color='blue', label='Actual Data')
+plt.plot(X_test, y_pred, color='red', linewidth=2, label='Regression Line')
+plt.xlabel('Hours Spent on Social Media')
+plt.ylabel('Stress Level')
+plt.title('Actual vs Predicted Stress Level')
+plt.legend()
+plt.grid(True)
+plt.show()
