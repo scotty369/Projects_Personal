@@ -1,0 +1,56 @@
+import time
+import logging
+from datetime import datetime
+import schedule
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Define the task functions
+def task1():
+    try:
+        logging.info("Executing Task 1")
+        # Add the logic for Task 1 here
+        print("Task 1 executed")
+    except Exception as e:
+        logging.error(f"Error executing Task 1: {e}")
+
+def task2():
+    try:
+        logging.info("Executing Task 2")
+        # Add the logic for Task 2 here
+        print("Task 2 executed")
+    except Exception as e:
+        logging.error(f"Error executing Task 2: {e}")
+
+def task3():
+    try:
+        logging.info("Executing Task 3")
+        # Add the logic for Task 3 here
+        print("Task 3 executed")
+    except Exception as e:
+        logging.error(f"Error executing Task 3: {e}")
+
+def task4():
+    try:
+        logging.info("Executing Task 4")
+        # Add the logic for Task 4 here
+        print("Task 4 executed")
+    except Exception as e:
+        logging.error(f"Error executing Task 4: {e}")
+
+# Schedule the tasks
+schedule.every(10).seconds.do(task1)  # Execute task1 every 10 seconds
+schedule.every().hour.do(task2)       # Execute task2 every hour
+schedule.every().day.at("10:30").do(task3)  # Execute task3 every day at 10:30 AM
+schedule.every().monday.do(task4)  # Execute task4 every Monday
+
+# Run the scheduled tasks
+def run_scheduler():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+if __name__ == "__main__":
+    logging.info("Starting the Task Automated Machine")
+    run_scheduler()
